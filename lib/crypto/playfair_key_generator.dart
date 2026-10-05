@@ -9,36 +9,23 @@ const List<String> turkishLetters = [
   'M', 'N', 'O', 'Ö', 'P', 'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z',
 ];
 
-/// Anahtar karesine eklenen 7 ekstra noktalama karakteri:
-/// boşluk, nokta, virgül, ünlem, soru işareti, iki nokta üst üste,
-/// noktalı virgül.
+/// Anahtar karesine eklenen 7 ekstra noktalama karakteri: boşluk, nokta, virgül, ünlem, soru işareti, iki nokta üst üste, noktalı virgül.
 const List<String> extraPunctuation = [' ', '.', ',', '!', '?', ':', ';'];
 
-/// Playfair şifrelemesinde kullanılan tam karakter kümesi: 29 Türkçe
-/// harf + 7 noktalama karakteri = 36 karakter (6x6 ızgarayı tam doldurur).
+/// Playfair şifrelemesinde kullanılan tam karakter kümesi: 29 Türkçe harf + 7 noktalama karakteri = 36 karakter (6x6 ızgarayı tam doldurur).
 final List<String> playfairAlphabet = [
   ...turkishLetters,
   ...extraPunctuation,
 ];
 
-/// Playfair şifreleme/şifre çözme için rastlantısal 6x6 **secret key
-/// karesi (key square)** üreten sınıf.
-///
-/// Klasik Hill Cipher'daki sayısal/tersinir matristen farklı olarak,
-/// Playfair anahtarı [playfairAlphabet] içindeki 36 karakterin
-/// **rastgele bir permütasyonudur**: her karakter ızgarada tam olarak
-/// bir kez bulunur, tekrar yoktur ve eksik karakter yoktur. Projenin
-/// tüm şifreleme/şifre çözme akışı, üretilen bu 6x6 karakter karesi
-/// üzerinden döner.
+/// Playfair şifreleme/şifre çözme için rastlantısal 6x6 secret key karesi (key square) üreten, her karakterin ızgarada tam bir kez bulunduğu bir permütasyon üreten sınıf.
 // tekrarlanabilir sabit sayılar da verilebilir, Random.secure() ile farklı da üretilebilir
 class PlayfairKeyGenerator {
   PlayfairKeyGenerator({Random? random}) : _random = random ?? Random.secure();
 
   final Random _random;
 
-  /// [playfairAlphabet] içindeki 36 karakteri rastgele karıştırıp
-  /// 6x6'lık bir secret key karesi (List<List<String>>) olarak
-  /// döndürür.
+  /// [playfairAlphabet] içindeki 36 karakteri rastgele karıştırıp 6x6'lık bir secret key karesi (List<List<String>>) olarak döndürür.
   List<List<String>> generateKey() {
     final shuffled = List<String>.from(playfairAlphabet)..shuffle(_random);
 
@@ -48,9 +35,7 @@ class PlayfairKeyGenerator {
     );
   }
 
-  /// Verilen anahtar karesinin geçerli olup olmadığını kontrol eder:
-  /// 6x6 boyutunda olmalı, [playfairAlphabet] içindeki 36 karakterin
-  /// her biri tam olarak bir kez bulunmalıdır.
+  /// Verilen anahtar karesinin 6x6 boyutunda olup [playfairAlphabet] içindeki 36 karakterin her birini tam olarak bir kez içerdiğini kontrol eder.
   bool isValidKey(List<List<String>> grid) {
     if (grid.length != kGridSize) return false;
     for (final row in grid) {
@@ -65,11 +50,7 @@ class PlayfairKeyGenerator {
     return flattened.length == actual.length && expected.length == actual.length && expected.containsAll(actual);
   }
 
-  /// Verilen karakterin anahtar karesindeki (satır, sütun) konumunu
-  /// döndürür. Şifreleme/şifre çözme algoritmalarında karakter
-  /// çiftlerinin konumunu bulmak için kullanılır.
-  ///
-  /// Karakter karede bulunamazsa `null` döner.
+  /// Verilen karakterin anahtar karesindeki (satır, sütun) konumunu döndürür, karakter karede bulunamazsa `null` döner.
   Point<int>? positionOf(List<List<String>> grid, String char) {
     final upper = char.toUpperCase();
     for (var row = 0; row < grid.length; row++) {
@@ -83,22 +64,12 @@ class PlayfairKeyGenerator {
   }
 }
 
-/// Üretilen anahtar karesini saklama/aktarma (örn. SharedPreferences,
-/// dosya, veritabanı) amacıyla düz metne çevirir.
-///
-/// Izgara her zaman tam olarak [kGridSize] * [kGridSize] (36) karakter
-/// içerdiğinden ve her hücre tek bir karakter olduğundan, herhangi bir
-/// ayraç (örn. ',' veya ';') kullanılmaz; bunun nedeni bu karakterlerin
-/// kendisinin de [extraPunctuation] kümesinde (yani ızgara içeriğinde)
-/// yer alabilmesi ve ayraç olarak kullanılırsa veriyle çakışmasıdır.
-/// Bunun yerine karakterler satır satır, sırayla birleştirilir.
+/// Üretilen anahtar karesini saklama/aktarma amacıyla, ayraç kullanmadan (çünkü ayraç karakterleri de alfabede yer alabilir) satır satır düz metne çevirir.
 String playfairKeyToString(List<List<String>> key) {
   return key.expand((row) => row).join();
 }
 
-/// [playfairKeyToString] ile üretilmiş düz metin anahtarı tekrar
-/// 6x6 karakter karesine çevirir. Girdinin tam olarak
-/// [kGridSize] * [kGridSize] karakter uzunluğunda olması beklenir.
+/// [playfairKeyToString] ile üretilmiş düz metin anahtarı tekrar 6x6 karakter karesine çevirir; girdinin tam olarak [kGridSize] * [kGridSize] karakter uzunluğunda olması beklenir.
 List<List<String>> playfairKeyFromString(String data) {
   final expectedLength = kGridSize * kGridSize;
   if (data.length != expectedLength) {
