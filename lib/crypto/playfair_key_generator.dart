@@ -30,6 +30,7 @@ final List<String> playfairAlphabet = [
 /// bir kez bulunur, tekrar yoktur ve eksik karakter yoktur. Projenin
 /// tüm şifreleme/şifre çözme akışı, üretilen bu 6x6 karakter karesi
 /// üzerinden döner.
+// tekrarlanabilir sabit sayılar da verilebilir, Random.secure() ile farklı da üretilebilir
 class PlayfairKeyGenerator {
   PlayfairKeyGenerator({Random? random}) : _random = random ?? Random.secure();
 
